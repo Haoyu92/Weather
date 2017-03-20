@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_input"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="30dp"
+    android:paddingLeft="30dp"
+    android:paddingRight="30dp"
+    android:paddingTop="30dp"
+    android:background="@color/colorPrimary"
+    tools:context="com.haoyu.weather.InputActivity">
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:id="@+id/linear"
+        android:layout_centerHorizontal="true">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/weather1"
+            android:id="@+id/imageView" />
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/weather2"
+            android:layout_marginLeft="15dp"
+            android:id="@+id/imageView2" />
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/weather3"
+            android:layout_marginLeft="15dp"
+            android:id="@+id/imageView3" />
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/weather4"
+            android:layout_marginLeft="15dp"
+            android:id="@+id/imageView4" />
+    </LinearLayout>
+
+
+    <Button
+        android:text="Search\nweather"
+        android:textSize="17dp"
+        android:textColor="#fff"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/countryName"
+        android:layout_marginTop="25dp"
+        android:id="@+id/confirm"
+        android:background="@color/colorPrimaryDark" />
+
+    <Button
+        android:text="Local\nweather"
+        android:textSize="17dp"
+        android:textColor="#fff"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/current"
+        android:background="@color/colorPrimaryDark"
+        android:layout_alignBottom="@+id/confirm"
+        android:layout_alignParentRight="true"/>
+
+    <TextView
+        android:text="City: "
+        android:textSize="30dp"
+        android:textColor="#fff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linear"
+        android:layout_marginTop="40dp"
+        android:id="@+id/city" />
+
+    <TextView
+        android:text="Country: "
+        android:textSize="30dp"
+        android:textColor="#fff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/city"
+        android:layout_marginTop="10dp"
+        android:id="@+id/country" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:textSize="20dp"
+        android:textColor="#fff"
+        android:id="@+id/cityName"
+        android:layout_toRightOf="@+id/city"
+        android:layout_alignBottom="@+id/city"
+        android:layout_toEndOf="@+id/city" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:textSize="20dp"
+        android:textColor="#fff"
+        android:id="@+id/countryName"
+        android:layout_alignBottom="@+id/country"
+        android:layout_toRightOf="@+id/country"
+        android:layout_toEndOf="@+id/country" />
+
+
+</RelativeLayout>
