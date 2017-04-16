@@ -31,6 +31,7 @@ public class InputActivity extends Activity {
     private IntentFilter intentFilter;
     private NetworkChangeReceiver networkChangeReceiver;
     private int networkStatus;
+
     public int getNetworkStatus() {
         return networkStatus;
     }
@@ -42,6 +43,78 @@ public class InputActivity extends Activity {
     private LocationManager locationManager;
     private String provider;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_input);
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        networkChangeReceiver = new NetworkChangeReceiver();
+        registerReceiver(networkChangeReceiver, intentFilter);
+
+        cityName = (TextView) findViewById(R.id.cityName);
+        countryName = (TextView) findViewById(R.id.countryName);
+        confirm = (Button) findViewById(R.id.confirm);
+        confirm.setOnClickListener(isConfirm);
+        current = (Button) findViewById(R.id.current);
+        current.setOnClickListener(isCurrent);
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        List<String> providerList = locationManager.getProviders(true);
+        if (providerList.contains(LocationManager.GPS_PROVIDER)) {
+            provider = LocationManager.GPS_PROVIDER;
+        } else if (providerList.contains(LocationManager.NETWORK_PROVIDER)) {
+            provider = LocationManager.NETWORK_PROVIDER;
+        } else {
+            Toast.makeText(this, "Location provider is unavailable", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private View.OnClickListener isConfirm = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (networkStatus == 0) {
+                Toast.makeText(InputActivity.this, "Network is unavailable", Toast.LENGTH_SHORT).show();
+            } else {
+                Intent intent = new Intent(InputActivity.this, MainActivity.class);
+                String[] information = {cityName.getText().toString(), countryName.getText().toString()};
+                intent.putExtra("Info", information);
+                startActivity(intent);
+            }
+        }
+    };
+
+    private View.OnClickListener isCurrent = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (networkStatus == 0) {
+                Toast.makeText(InputActivity.this, "Network is unavailable", Toast.LENGTH_SHORT).show();
+            } else {
+                if (ActivityCompat.checkSelfPermission(InputActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(InputActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    Toast.makeText(InputActivity.this, "Please enable location service in Settings", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Location location = locationManager.getLastKnownLocation(provider);
+                if (location != null) {
+                    showLocation(location);
+                }
+                locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
+
+                Intent intent = new Intent(InputActivity.this, LocalActivity.class);
+                String[] information = {String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude())};
+                intent.putExtra("Info", information);
+                startActivity(intent);
+            }
+        }
+    };
 
     class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
@@ -57,89 +130,24 @@ public class InputActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_input);
-        intentFilter = new IntentFilter();
-        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-        networkChangeReceiver = new NetworkChangeReceiver();
-        registerReceiver(networkChangeReceiver, intentFilter);
-
-        cityName = (TextView) findViewById(R.id.cityName);
-        countryName = (TextView) findViewById(R.id.countryName);
-        confirm = (Button) findViewById(R.id.confirm);
-        confirm.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-
-                if (networkStatus == 0) {
-                    Toast.makeText(InputActivity.this, "Network is unavailable", Toast.LENGTH_SHORT).show();
-                } else {
-                    Intent intent = new Intent(InputActivity.this, MainActivity.class);
-                    String[] information = {cityName.getText().toString(), countryName.getText().toString()};
-                    intent.putExtra("Info", information);
-                    startActivity(intent);
-                }
-            }
-        });
-        current = (Button) findViewById(R.id.current);
-        current.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (networkStatus == 0) {
-                    Toast.makeText(InputActivity.this, "Network is unavailable", Toast.LENGTH_SHORT).show();
-                } else {
-                    Location location = locationManager.getLastKnownLocation(provider);
-                    if (location != null) {
-                        showLocation(location);
-                    }
-                    locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
-
-                    Intent intent = new Intent(InputActivity.this, LocalActivity.class);
-                    String[] information = {String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude())};
-                    intent.putExtra("Info", information);
-                    startActivity(intent);
-                    if (ActivityCompat.checkSelfPermission(InputActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(InputActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
-                        return;
-                    }
-
-                }
-            }
-        });
-
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        List<String> providerList = locationManager.getProviders(true);
-        if (providerList.contains(LocationManager.GPS_PROVIDER)) {
-            provider = LocationManager.GPS_PROVIDER;
-        } else if (providerList.contains(LocationManager.NETWORK_PROVIDER)) {
-            provider = LocationManager.NETWORK_PROVIDER;
-        } else {
-
-            Toast.makeText(this, "No location provider to use", Toast.LENGTH_SHORT).show();
-            return;
+    LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
         }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        @Override
+        public void onProviderEnabled(String provider) {
         }
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
+        @Override
+        public void onLocationChanged(Location location) {
+        }
+    };
 
+    private void showLocation(Location location) {
+        String currentPosition = "latitude is " + location.getLatitude() + "\n" + "longitude is " + location.getLongitude();
+        Toast.makeText(this, currentPosition, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -159,27 +167,6 @@ public class InputActivity extends Activity {
             }
             locationManager.removeUpdates(locationListener);
         }
-    }
-
-
-    LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-        @Override
-        public void onProviderDisabled(String provider) {
-        }
-        @Override
-        public void onLocationChanged(Location location) {
-
-        }
-    };
-    private void showLocation(Location location) {
-        String currentPosition = "latitude is " + location.getLatitude() + "\n" + "longitude is " + location.getLongitude();
-        Toast.makeText(this, currentPosition, Toast.LENGTH_SHORT).show();
     }
 
 }
