@@ -43,6 +43,9 @@ public class InputActivity extends Activity {
     private LocationManager locationManager;
     private String provider;
 
+    LocationManager mLocationManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,19 +105,49 @@ public class InputActivity extends Activity {
                     Toast.makeText(InputActivity.this, "Please enable location service in Settings", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Location location = locationManager.getLastKnownLocation(provider);
+
+                Location location = getLastKnownLocation();
+                //Location location = locationManager.getLastKnownLocation(provider);
+                locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
                 if (location != null) {
                     showLocation(location);
+                    Intent intent = new Intent(InputActivity.this, LocalActivity.class);
+                    String[] information = {String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude())};
+                    intent.putExtra("Info", information);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(InputActivity.this, "Cannot access current location", Toast.LENGTH_SHORT).show();
                 }
-                locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
-
-                Intent intent = new Intent(InputActivity.this, LocalActivity.class);
-                String[] information = {String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude())};
-                intent.putExtra("Info", information);
-                startActivity(intent);
             }
         }
     };
+
+    private Location getLastKnownLocation() {
+        mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return null;
+            }
+            Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
+    }
 
     class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
